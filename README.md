@@ -1060,11 +1060,22 @@ Describe purpose and DB changes. UI nav path and routes registered here.
 
 ---
 
+## Database migrations
+
+The API now uses [Drizzle ORM](https://orm.drizzle.team/) with Postgres 17. Create a `.env.local` alongside the repo root that sets `DATABASE_URL` (the default points to `postgresql://postgres:postgres@localhost:5432/cortex`). To define or evolve tables:
+
+```bash
+npm run db:generate   # compile schema changes in apps/api/src/db/schema.ts into SQL
+npm run db:migrate    # apply the generated SQL against the configured Postgres instance
+```
+
+Generated migrations are stored in `apps/api/drizzle` and should be committed to version control.
+
 ## Next Steps
 
 1. Create a new GitHub repo and copy this scaffold.
 2. Replace `LICENSE` copyright holder.
-3. Wire Postgres connection + migrations in `apps/api` (e.g., via Prisma/Drizzle/Knex) and mount module migrations.
+3. Extend the Drizzle Postgres models in `apps/api/src/db/schema.ts`, generate SQL with `npm run db:generate`, and apply with `npm run db:migrate`.
 4. Implement E2EE client lib (libsodium) and replace placeholder crypto.
 5. Flesh out API routes and PWA pages per SPEC.
 

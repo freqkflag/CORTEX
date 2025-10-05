@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Warn on non-Conventional commit messages
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const conventionalRegex = /^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\(.+\))?: .+/;
+            const eventName = context.eventName;
+            let commits = [];
+
+            if (eventName === 'pull_request') {
+              const pullNumber = context.payload.pull_request?.number;
+              if (!pullNumber) {
+                core.info('No pull request context detected.');
+              } else {
+                const { data } = await github.rest.pulls.listCommits({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: pullNumber,
+                  per_page: 250,
+                });
+                commits = data.map((entry) => entry.commit.message.split('\n')[0]);
+              }
+            } else if (eventName === 'push') {
+              const payloadCommits = context.payload.commits ?? [];
+              commits = payloadCommits.map((entry) => entry.message.split('\n')[0]);
+            } else {
+              core.info(`Commit message guidance not implemented for event: ${eventName}`);
+            }
+
+            if (!commits.length) {
+              core.info('No commit messages to inspect.');
+              return;
+            }
+
+            const invalid = commits.filter((message) => !conventionalRegex.test(message));
+
+            if (invalid.length) {
+              const formatted = invalid.map((message) => `- ${message}`).join('\n');
+              core.warning(`Commit messages that do not follow Conventional Commits were detected:\n${formatted}`);
+            } else {
+              core.info('All commit messages follow Conventional Commits.');
+            }
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint all workspaces
+        run: npm run lint --workspaces --if-present
+
+      - name: Build all workspaces
+        run: npm run build --workspaces --if-present
+
+      - name: Test all workspaces
+        env:
+          CI: 'true'
+        run: npm test --workspaces --if-present -- --runInBand

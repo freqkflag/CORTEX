@@ -1,0 +1,17 @@
+{
+  "name": "cortex",
+  "private": true,
+  "version": "0.1.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "modules/*"
+  ],
+  "scripts": {
+    "db:migrate": "npm run db:migrate --workspace @cortex/api",
+    "db:generate": "npm run db:generate --workspace @cortex/api"
+  }
+}
