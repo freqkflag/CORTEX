@@ -13,6 +13,7 @@ Thanks for helping improve CORTEX! This guide highlights the essentials so you c
    - `npm run lint`
    - `npm run build`
    - `npm test`
+   - `npm run db:migrate` (after generating migrations) when your change modifies database schema
 4. Keep sensitive data encrypted end-to-end. Never log plaintext secrets or decrypted payloads on the server.
 
 ## Commit Message Guidelines
