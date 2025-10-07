@@ -1071,13 +1071,3 @@ npm run db:migrate    # apply the generated SQL against the configured Postgres 
 
 Generated migrations are stored in `apps/api/drizzle` and should be committed to version control.
 
-## Next Steps
-
-1. Create a new GitHub repo and copy this scaffold.
-2. Replace `LICENSE` copyright holder.
-3. Extend the Drizzle Postgres models in `apps/api/src/db/schema.ts`, generate SQL with `npm run db:generate`, and apply with `npm run db:migrate`.
-4. Implement E2EE client lib (libsodium) and replace placeholder crypto.
-5. Flesh out API routes and PWA pages per SPEC.
-
-```
-```
