@@ -1,7 +1,5 @@
 # CORTEX (Self-Hosted) — GitHub Repository Scaffold
 
-> Copy these files/folders into a fresh repo named `CORTEX` (or any name). The scaffold boots a minimal stack: **NestJS API**, **React/Vite PWA**, **Indexer stub**, **Ollama**, **Postgres+pgvector**, **Caddy**, **MinIO**. E2EE hooks are stubbed client-side.
-
 ---
 
 ## Repository Tree
