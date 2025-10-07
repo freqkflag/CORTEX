@@ -1,6 +1,3 @@
-# CORTEX (Self-Hosted) — GitHub Repository Scaffold
-
----
 # CORTEX (Self‑Hosted)
 
 Privacy‑first, local‑first personal platform to manage your whole life: Tasks, Calendar, Notes (with backlinks), Journal, and modular domains (Health, Finances, Family, Pets, Auto, Career, Projects, Hobbies, Trips, Memories, Photo Galleries, Sexual Health, Document Storage, Small Business, Personal Branding, Personal Website, Social Media). End‑to‑end encryption (E2EE) is **on by default**. A local LLM (via Ollama) powers an on‑device/own‑server assistant with private retrieval (LlamaIndex + pgvector).
