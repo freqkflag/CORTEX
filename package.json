@@ -11,6 +11,8 @@
     "modules/*"
   ],
   "scripts": {
+    "dev:compose": "docker compose --env-file infra/docker/.env -f infra/docker/docker-compose.yml up -d",
+    "dev:compose:down": "docker compose --env-file infra/docker/.env -f infra/docker/docker-compose.yml down",
     "db:migrate": "npm run db:migrate --workspace @cortex/api",
     "db:generate": "npm run db:generate --workspace @cortex/api"
   }
