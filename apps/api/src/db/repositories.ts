@@ -1,9 +1,11 @@
-import { and, eq, gte, inArray, lte } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, lte } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 
 import {
   coreAttachment,
   coreEmbedding,
+  coreE2eeIndex,
+  coreE2eePayload,
   coreEvent,
   coreFile,
   coreJournalEntry,
@@ -13,6 +15,8 @@ import {
   coreTag,
   coreTagMap,
   coreTask,
+  NewCoreE2eeIndex,
+  NewCoreE2eePayload,
   NewCoreAttachment,
   NewCoreEmbedding,
   NewCoreEvent,
@@ -361,5 +365,96 @@ export class EmbeddingRepository {
       .select()
       .from(coreEmbedding)
       .where(and(eq(coreEmbedding.entityType, entityType), eq(coreEmbedding.entityId, entityId)));
+  }
+}
+
+type TransactionCallback<T> = (tx: Database) => Promise<T>;
+
+export class E2eeRepository {
+  constructor(private readonly db: Database) {}
+
+  async getLatest(entityType: string, entityId: string) {
+    const [latest] = await this.db
+      .select()
+      .from(coreE2eePayload)
+      .where(and(eq(coreE2eePayload.entityType, entityType), eq(coreE2eePayload.entityId, entityId)))
+      .orderBy(desc(coreE2eePayload.rev))
+      .limit(1);
+    return latest ?? null;
+  }
+
+  async listRevisions(entityType: string, entityId: string) {
+    return this.db
+      .select()
+      .from(coreE2eePayload)
+      .where(and(eq(coreE2eePayload.entityType, entityType), eq(coreE2eePayload.entityId, entityId)))
+      .orderBy(coreE2eePayload.rev);
+  }
+
+  async listIndexes(entityType: string, entityId: string) {
+    return this.db
+      .select()
+      .from(coreE2eeIndex)
+      .where(and(eq(coreE2eeIndex.entityType, entityType), eq(coreE2eeIndex.entityId, entityId)));
+  }
+
+  async transactionalWrite<T>({
+    payload,
+    indexes = [],
+    mutateBase,
+    replaceIndexes = true
+  }: {
+    payload: NewCoreE2eePayload;
+    indexes?: readonly NewCoreE2eeIndex[];
+    mutateBase: TransactionCallback<T>;
+    replaceIndexes?: boolean;
+  }) {
+    const entityType = payload.entityType;
+    const entityId = payload.entityId;
+    const now = new Date();
+
+    return this.db.transaction(async (tx) => {
+      const result = await mutateBase(tx as unknown as Database);
+
+      const payloadValues: NewCoreE2eePayload = {
+        entityType,
+        entityId,
+        rev: payload.rev,
+        nonce: payload.nonce,
+        ciphertext: payload.ciphertext,
+        ...(payload.createdAt ? { createdAt: payload.createdAt } : {}),
+        updatedAt: payload.updatedAt ?? now
+      };
+
+      await tx
+        .insert(coreE2eePayload)
+        .values(payloadValues)
+        .onConflictDoUpdate({
+          target: [coreE2eePayload.entityType, coreE2eePayload.entityId, coreE2eePayload.rev],
+          set: {
+            nonce: payload.nonce,
+            ciphertext: payload.ciphertext,
+            updatedAt: now
+          }
+        });
+
+      if (replaceIndexes) {
+        await tx
+          .delete(coreE2eeIndex)
+          .where(and(eq(coreE2eeIndex.entityType, entityType), eq(coreE2eeIndex.entityId, entityId)));
+      }
+
+      if (indexes.length) {
+        const normalized = indexes.map((entry) => ({
+          entityType,
+          entityId,
+          field: entry.field,
+          tokenHash: entry.tokenHash
+        }));
+        await tx.insert(coreE2eeIndex).values(normalized);
+      }
+
+      return result;
+    });
   }
 }

@@ -291,6 +291,4 @@ This file collects short, copyable prompts to drive Codex (or a similar AI code 
 
 ---
 
-## One‑shot meta prompt (use sparingly)
 
-> You are assisting on CORTEX. Follow the SPEC and this Prompt Pack. For the next task, propose a minimal plan, then implement, then print: files changed, test plan, and run instructions. Respect E2EE: never log or persist plaintext; sensitive fields are encrypted client‑side. Prefer client compute; only use server LLM when `Consented-Compute: allowed` header is present.

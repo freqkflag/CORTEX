@@ -1,5 +1,7 @@
 import {
   CoreAttachment,
+  CoreE2eeIndex,
+  CoreE2eePayload,
   CoreEmbedding,
   CoreEvent,
   CoreFile,
@@ -11,6 +13,8 @@ import {
   CoreTagMap,
   CoreTask,
   NewCoreAttachment,
+  NewCoreE2eeIndex,
+  NewCoreE2eePayload,
   NewCoreEmbedding,
   NewCoreEvent,
   NewCoreFile,
@@ -55,6 +59,12 @@ export type NewAttachmentModel = NewCoreAttachment;
 
 export type EmbeddingModel = CoreEmbedding;
 export type NewEmbeddingModel = NewCoreEmbedding;
+
+export type E2eePayloadModel = CoreE2eePayload;
+export type NewE2eePayloadModel = NewCoreE2eePayload;
+
+export type E2eeIndexModel = CoreE2eeIndex;
+export type NewE2eeIndexModel = NewCoreE2eeIndex;
 
 export type CoreEntityType =
   | "note"

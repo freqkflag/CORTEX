@@ -153,6 +153,35 @@ export const coreEmbedding = pgTable("core_embedding", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow()
 });
 
+export const coreE2eePayload = pgTable(
+  "core_e2ee_payload",
+  {
+    entityType: text("entity_type").notNull(),
+    entityId: uuid("entity_id").notNull(),
+    rev: integer("rev").notNull(),
+    nonce: text("nonce").notNull(),
+    ciphertext: text("ciphertext").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow()
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.entityType, table.entityId, table.rev] })
+  })
+);
+
+export const coreE2eeIndex = pgTable(
+  "core_e2ee_index",
+  {
+    entityType: text("entity_type").notNull(),
+    entityId: uuid("entity_id").notNull(),
+    field: text("field").notNull(),
+    tokenHash: text("token_hash").notNull()
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.entityType, table.entityId, table.field, table.tokenHash] })
+  })
+);
+
 export const schema = {
   coreNote,
   coreLink,
@@ -164,7 +193,9 @@ export const schema = {
   coreProp,
   coreFile,
   coreAttachment,
-  coreEmbedding
+  coreEmbedding,
+  coreE2eePayload,
+  coreE2eeIndex
 } satisfies Record<string, AnyPgTable>;
 
 export type CoreNote = typeof coreNote.$inferSelect;
@@ -189,3 +220,7 @@ export type CoreAttachment = typeof coreAttachment.$inferSelect;
 export type NewCoreAttachment = typeof coreAttachment.$inferInsert;
 export type CoreEmbedding = typeof coreEmbedding.$inferSelect;
 export type NewCoreEmbedding = typeof coreEmbedding.$inferInsert;
+export type CoreE2eePayload = typeof coreE2eePayload.$inferSelect;
+export type NewCoreE2eePayload = typeof coreE2eePayload.$inferInsert;
+export type CoreE2eeIndex = typeof coreE2eeIndex.$inferSelect;
+export type NewCoreE2eeIndex = typeof coreE2eeIndex.$inferInsert;
